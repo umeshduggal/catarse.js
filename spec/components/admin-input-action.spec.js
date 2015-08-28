@@ -14,7 +14,8 @@ describe('AdminInputAction', function(){
         innerLabel: 'inner',
         outerLabel: 'outer',
         placeholder: 'place',
-        model: testModel
+        model: testModel,
+        updateModel: testModel
       };
 
   describe('controller', function(){
