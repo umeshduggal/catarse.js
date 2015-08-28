@@ -1,4 +1,4 @@
-window.c.project.RewardsManage = (function(m, models, _){
+window.c.project.RewardsManage = (function(m, models, h, _){
   return {
     controller: function(args) {
       var vm = m.postgrest.filtersVM({project_id: 'eq'}),
@@ -20,7 +20,7 @@ window.c.project.RewardsManage = (function(m, models, _){
             return _.map(projectDetail.rewards, function(reward){
               return m('.w-row.card.u-radius.u-marginbottom-20.medium.card-terciary', [
                 m('.w-col.w-col-8.u-marginbottom-30.w-sub-col', [
-                  m('.fontsize-large.fontweight-semibold', 'Recompensa R$ ' + reward.minimum_value),
+                  m('.fontsize-large.fontweight-semibold', 'Recompensa R$ ' + h.formatNumber(reward.minimum_value, 2, 3)),
                   m('.fontsize-small.fontweight-semibold.u-marginbottom-10', reward.paid_count + ' apoiadores'),
                   m('.fontsize-smaller', reward.description)
                 ]),
@@ -35,4 +35,4 @@ window.c.project.RewardsManage = (function(m, models, _){
       ]);
     }
   };
-}(window.m, window.c.models, window._));
+}(window.m, window.c.models, window.c.h, window._));
