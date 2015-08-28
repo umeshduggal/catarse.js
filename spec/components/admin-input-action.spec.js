@@ -61,21 +61,5 @@ describe('AdminInputAction', function(){
         expect($output.first('input[type="submit"]').attrs.value).toEqual(args.callToAction);
       });
     });
-
-    describe('on form submit', function(){
-      beforeAll(function(){
-        spyOn(m, 'request').and.callFake(function(){
-          return [{test: true}];
-        });
-      });
-      beforeEach(function(){
-        $output.click('button');
-      });
-
-      it('should call a submit function on form submit', function(){
-        $output.trigger('form', 'submit');
-        expect(m.request).toHaveBeenCalled();
-      });
-    });
   });
 });
