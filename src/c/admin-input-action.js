@@ -18,9 +18,7 @@ window.c.AdminInputAction = (function(m, h, c){
 
       var updateItem = function(){
         builder.updateModel.getRowWithToken(updateVM.parameters()).then(function(newItem){
-          _.map(Object.keys(newItem[0]), function(key){
-            item[key] = newItem[0][key];
-          });
+          item(newItem[0]);
           complete(true);
         });
       };

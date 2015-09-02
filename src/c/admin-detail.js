@@ -13,9 +13,9 @@ window.c.AdminDetail = (function(m, _, c){
           })
         ),
         m('.w-row.card.card-terciary.u-radius',[
-          m.component(c.AdminTransaction, {contribution: item}),
-          m.component(c.AdminTransactionHistory, {contribution: item}),
-          m.component(c.AdminReward, {contribution: item, key: item.key})
+          m.component(c.AdminTransaction, {contribution: item()}),
+          m.component(c.AdminTransactionHistory, {contribution: item()}),
+          m.component(c.AdminReward, {contribution: item(), key: item().key})
         ])
       ]);
     }
