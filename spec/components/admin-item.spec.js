@@ -6,7 +6,7 @@ describe('AdminItem', function(){
   describe('view', function(){
     beforeAll(function(){
       spyOn(m, 'component').and.callThrough();
-      item = ContributionDetailMockery(1)[0];
+      item = m.prop(ContributionDetailMockery(1)[0]);
       itemDescriber = ItemDescriberMock();
       $output = mq(AdminItem, {builder: itemDescriber, item: item});
     });

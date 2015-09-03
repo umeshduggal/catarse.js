@@ -2,13 +2,13 @@ describe('PaymentStatus', function(){
   var c = window.c,
       ctrl,
       setController = function(contribution){
-        var payment = {
+        var payment = m.prop({
           gateway: contribution.gateway,
           gateway_data: contribution.gateway_data,
           installments: contribution.installments,
           state: contribution.state,
           payment_method: contribution.payment_method
-        };
+        });
         ctrl = m.component(c.PaymentStatus, {item: payment}).controller();
       };
 
@@ -65,13 +65,13 @@ describe('PaymentStatus', function(){
   describe('view', function() {
     var getOutput = function(payment_method){
       var contribution = ContributionDetailMockery(1, {payment_method: payment_method})[0],
-          payment = {
+          payment = m.prop({
             gateway: contribution.gateway,
             gateway_data: contribution.gateway_data,
             installments: contribution.installments,
             state: contribution.state,
             payment_method: contribution.payment_method
-          };
+          });
       return mq(m.component(c.PaymentStatus, {item: payment}));
     };
 
