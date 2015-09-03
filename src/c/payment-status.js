@@ -1,7 +1,7 @@
 window.c.PaymentStatus = (function(m){
   return {
     controller: function(args){
-      var payment = args.item, card = null,
+      var payment = args.item(), card = null,
           displayPaymentMethod, paymentMethodClass, stateClass;
 
       card = function(){

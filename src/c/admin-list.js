@@ -30,7 +30,7 @@ window.c.AdminList = (function(m, h, c){
               m('#admin-contributions-list.w-container',[
                 list.collection().map(function(item) {
                   item = m.prop(item);
-                  return m.component(c.AdminItem, {builder: args.itemBuilder, actions: args.itemActions, item: item, key: item.key});
+                  return m.component(c.AdminItem, {builder: args.itemBuilder, actions: args.itemActions, item: item, key: item().key});
                 }),
                 m('.w-section.section',[
                   m('.w-container',[
