@@ -2,7 +2,7 @@
     Catarse JS components
     Copyright (c) 2007 - 2015 Diogo Biazus
     Licensed under the MIT license
-    Version: 0.0.6
+    Version: 0.0.9
 */
 window.c = function() {
     return {
@@ -29,21 +29,27 @@ window.c = function() {
         return p.toggle = function() {
             p(p() === alternateState ? defaultState : alternateState);
         }, p;
-    }, loader = function() {
+    }, idVM = m.postgrest.filtersVM({
+        id: "eq"
+    }), loader = function() {
         return m('.u-text-center.u-margintop-30[style="margin-bottom:-110px;"]', [ m('img[alt="Loader"][src="https://s3.amazonaws.com/catarse.files/loader.gif"]') ]);
     };
     return {
         momentify: momentify,
         momentFromString: momentFromString,
         formatNumber: formatNumber,
+        idVM: idVM,
         toggleProp: toggleProp,
         loader: loader
     };
 }(window.m, window.moment), window.c.models = function(m) {
-    var contributionDetail = m.postgrest.model("contribution_details"), projectDetail = m.postgrest.model("project_details"), teamTotal = m.postgrest.model("team_totals", [ "member_count", "countries", "total_contributed_projects", "total_cities", "total_amount" ]), projectContributionsPerDay = m.postgrest.model("project_contributions_per_day"), projectContributionsPerLocation = m.postgrest.model("project_contributions_per_location"), teamMember = m.postgrest.model("team_members");
+    var contributionDetail = m.postgrest.model("contribution_details"), projectDetail = m.postgrest.model("project_details"), rewardDetail = m.postgrest.model("reward_details"), rewardSurveyQuestion = m.postgrest.model("reward_survey_questions"), contributions = m.postgrest.model("contributions"), teamTotal = m.postgrest.model("team_totals"), projectContributionsPerDay = m.postgrest.model("project_contributions_per_day"), projectContributionsPerLocation = m.postgrest.model("project_contributions_per_location"), teamMember = m.postgrest.model("team_members");
     return teamMember.pageSize(40), {
         contributionDetail: contributionDetail,
         projectDetail: projectDetail,
+        rewardDetail: rewardDetail,
+        rewardSurveyQuestion: rewardSurveyQuestion,
+        contributions: contributions,
         teamTotal: teamTotal,
         teamMember: teamMember,
         projectContributionsPerDay: projectContributionsPerDay,
@@ -68,12 +74,13 @@ window.c = function() {
             } ], itemActions = [ {
                 component: "AdminInputAction",
                 data: {
-                    attrName: "user_id",
+                    getKey: "user_id",
+                    updateKey: "id",
                     callToAction: "Transferir",
                     innerLabel: "Id do novo apoiador:",
                     outerLabel: "Transferir Apoio",
                     placeholder: "ex: 129908",
-                    vm: listVM
+                    model: c.models.contributionDetail
                 }
             } ], filterBuilder = [ {
                 component: "FilterMain",
@@ -186,15 +193,20 @@ window.c = function() {
         gateway: "eq",
         value: "between",
         created_at: "between"
-    });
+    }), paramToString = function(p) {
+        return (p || "").toString().trim();
+    };
     return vm.state(""), vm.gateway(""), vm.order({
         id: "desc"
     }), vm.created_at.lte.toFilter = function() {
-        return h.momentFromString(vm.created_at.lte()).endOf("day").format("");
+        var filter = paramToString(vm.created_at.lte());
+        return filter && h.momentFromString(filter).endOf("day").format("");
     }, vm.created_at.gte.toFilter = function() {
-        return h.momentFromString(vm.created_at.gte()).format();
+        var filter = paramToString(vm.created_at.gte());
+        return filter && h.momentFromString(filter).format();
     }, vm.full_text_index.toFilter = function() {
-        return replaceDiacritics(vm.full_text_index());
+        var filter = paramToString(vm.full_text_index());
+        return filter && replaceDiacritics(filter) || void 0;
     }, vm;
 }(window.m, window.c.h, window.replaceDiacritics), window.c.admin.contributionListVM = function(m, models) {
     return m.postgrest.paginationVM(models.contributionDetail.getPageWithToken);
@@ -250,20 +262,42 @@ window.c = function() {
 }(window.c, window.m, window._, window.c.h), window.c.AdminInputAction = function(m, h, c) {
     return {
         controller: function(args) {
+            var builder = args.data, complete = m.prop(!1), error = m.prop(!1), data = (m.prop(!1), 
+            {}), item = args.item, key = builder.getKey, newValue = m.prop(""), updateVM = m.postgrest.filtersVM({
+                contribution_id: "eq"
+            });
+            h.idVM.id(item[builder.updateKey]), updateVM.contribution_id(item.contribution_id);
+            var l = m.postgrest.loaderWithToken(builder.model.patchOptions(h.idVM.parameters(), data)), updateItem = function(res) {
+                _.extend(item, res[0]), complete(!0), error(!1);
+            }, submit = function() {
+                return data[key] = newValue(), l.load().then(updateItem, error), !1;
+            }, unload = function(el, isinit, context) {
+                context.onunload = function() {
+                    complete(!1), error(!1), newValue("");
+                };
+            };
             return {
-                toggler: h.toggleProp(!1, !0)
+                complete: complete,
+                error: error,
+                l: l,
+                newValue: newValue,
+                submit: submit,
+                toggler: h.toggleProp(!1, !0),
+                unload: unload
             };
         },
         view: function(ctrl, args) {
-            var action = args.data;
+            var data = args.data, btnValue = ctrl.l() ? "por favor, aguarde..." : data.callToAction;
             return m(".w-col.w-col-2", [ m("button.btn.btn-small.btn-terciary", {
                 onclick: ctrl.toggler.toggle
-            }, action.outerLabel), ctrl.toggler() ? m("form.dropdown-list.card.u-radius.dropdown-list-medium.zindex-10", [ m("form.w-form", {
+            }, data.outerLabel), ctrl.toggler() ? m(".dropdown-list.card.u-radius.dropdown-list-medium.zindex-10", {
+                config: ctrl.unload
+            }, [ m("form.w-form", {
                 onsubmit: ctrl.submit
-            }, [ m("label", action.outerLabel), m('input.w-input.text-field[type="text"][placeholder="' + action.placeholder + '"]', {
-                onchange: m.withAttr("value", action.vm),
-                value: action.vm()
-            }), m('input.w-button.btn.btn-small[type="submit"][value="' + action.callToAction + '"]') ]) ]) : "" ]);
+            }, ctrl.complete() ? ctrl.error() ? [ m('.w-form-error[style="display:block;"]', [ m("p", "Houve um problema na requisição. O apoio não foi transferido!") ]) ] : [ m('.w-form-done[style="display:block;"]', [ m("p", "Apoio transferido com sucesso!") ]) ] : [ m("label", data.innerLabel), m('input.w-input.text-field[type="text"][placeholder="' + data.placeholder + '"]', {
+                onchange: m.withAttr("value", ctrl.newValue),
+                value: ctrl.newValue()
+            }), m('input.w-button.btn.btn-small[type="submit"][value="' + btnValue + '"]') ]) ]) : "" ]);
         }
     };
 }(window.m, window.c.h, window.c), window.c.AdminItem = function(m, _, h, c) {
@@ -388,14 +422,14 @@ window.c = function() {
         controller: function(args) {
             var explanation = function(resource) {
                 var stateText = {
-                    online: [ m("span", "Você pode receber apoios até 23hs59min59s do dia " + h.momentify(resource.expires_at) + ". Lembre-se, é tudo-ou-nada e você só levará os recursos captados se bater a meta dentro desse prazo.") ],
+                    online: [ m("span", "Você pode receber apoios até 23hs59min59s do dia " + h.momentify(resource.zone_expires_at) + ". Lembre-se, é tudo-ou-nada e você só levará os recursos captados se bater a meta dentro desse prazo.") ],
                     successful: [ m("span.fontweight-semibold", resource.user.name + ", comemore que você merece!"), " Seu projeto foi bem sucedido e agora é a hora de iniciar o trabalho de relacionamento com seus apoiadores! ", "Atenção especial à entrega de recompensas. Prometeu? Entregue! Não deixe de olhar a seção de pós-projeto do ", m('a.alt-link[href="/guides"]', "Guia dos Realizadores"), " e de informar-se sobre ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202037493-FINANCIADO-Como-ser%C3%A1-feito-o-repasse-do-dinheiro-"][target="_blank"]', "como o repasse do dinheiro será feito.") ],
-                    waiting_funds: [ m("span.fontweight-semibold", resource.user.name + ", estamos processando os últimos pagamentos!"), " Seu projeto foi finalizado em " + h.momentify(resource.expires_at) + " e está aguardando confirmação de boletos e pagamentos. ", "Devido à data de vencimento de boletos, projetos que tiveram apoios de última hora ficam por até 4 dias úteis nesse status, contados a partir da data de finalização do projeto. ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202037493-FINANCIADO-Como-ser%C3%A1-feito-o-repasse-do-dinheiro-"][target="_blank"]', "Entenda como o repasse de dinheiro é feito para projetos bem sucedidos.") ],
+                    waiting_funds: [ m("span.fontweight-semibold", resource.user.name + ", estamos processando os últimos pagamentos!"), " Seu projeto foi finalizado em " + h.momentify(resource.zone_expires_at) + " e está aguardando confirmação de boletos e pagamentos. ", "Devido à data de vencimento de boletos, projetos que tiveram apoios de última hora ficam por até 4 dias úteis nesse status, contados a partir da data de finalização do projeto. ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202037493-FINANCIADO-Como-ser%C3%A1-feito-o-repasse-do-dinheiro-"][target="_blank"]', "Entenda como o repasse de dinheiro é feito para projetos bem sucedidos.") ],
                     failed: [ m("span.fontweight-semibold", resource.user.name + ", não desanime!"), " Seu projeto não bateu a meta e sabemos que isso não é a melhor das sensações. Mas não desanime. ", "Encare o processo como um aprendizado e não deixe de cogitar uma segunda tentativa. Não se preocupe, todos os seus apoiadores receberão o dinheiro de volta. ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202365507-Regras-e-funcionamento-dos-reembolsos-estornos"][target="_blank"]', "Entenda como fazemos estornos e reembolsos.") ],
                     rejected: [ m("span.fontweight-semibold", resource.user.name + ", infelizmente não foi desta vez."), " Você enviou seu projeto para análise do Catarse e entendemos que ele não está de acordo com o perfil do site. ", "Ter um projeto recusado não impede que você envie novos projetos para avaliação ou reformule seu projeto atual. ", "Converse com nosso atendimento! Recomendamos que você dê uma boa olhada nos ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202387638-Diretrizes-para-cria%C3%A7%C3%A3o-de-projetos"][target="_blank"]', "critérios da plataforma"), " e no ", m('a.alt-link[href="/guides"]', "guia dos realizadores"), "." ],
                     draft: [ m("span.fontweight-semibold", resource.user.name + ", construa o seu projeto!"), " Quanto mais cuidadoso e bem formatado for um projeto, maiores as chances de ele ser bem sucedido na sua campanha de captação. ", "Antes de enviar seu projeto para a nossa análise, preencha todas as abas ao lado com carinho. Você pode salvar as alterações e voltar ao rascunho de projeto quantas vezes quiser. ", "Quando tudo estiver pronto, clique no botão ENVIAR e entraremos em contato para avaliar o seu projeto." ],
                     in_analysis: [ m("span.fontweight-semibold", resource.user.name + ", você enviou seu projeto para análise em " + h.momentify(resource.sent_to_analysis_at) + " e receberá nossa avaliação em até 4 dias úteis após o envio!"), " Enquanto espera a sua resposta, você pode continuar editando o seu projeto. ", "Recomendamos também que você vá coletando feedback com as pessoas próximas e planejando como será a sua campanha." ],
-                    approved: [ m("span.fontweight-semibold", resource.user.name + "Nome do realizador, seu projeto foi aprovado!"), " Para colocar o seu projeto no ar é preciso apenas que você preencha os dados necessários na aba ", m('a.alt-link[href="#user_settings"]', "Conta"), ". É importante saber que cobramos a taxa de 13% do valor total arrecadado apenas por projetos bem sucedidos. Entenda ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202037493-FINANCIADO-Como-ser%C3%A1-feito-o-repasse-do-dinheiro-"][target="_blank"]', "como fazemos o repasse do dinheiro.") ]
+                    approved: [ m("span.fontweight-semibold", resource.user.name + ", seu projeto foi aprovado!"), " Para colocar o seu projeto no ar é preciso apenas que você preencha os dados necessários na aba ", m('a.alt-link[href="#user_settings"]', "Conta"), ". É importante saber que cobramos a taxa de 13% do valor total arrecadado apenas por projetos bem sucedidos. Entenda ", m('a.alt-link[href="http://suporte.catarse.me/hc/pt-br/articles/202037493-FINANCIADO-Como-ser%C3%A1-feito-o-repasse-do-dinheiro-"][target="_blank"]', "como fazemos o repasse do dinheiro.") ]
                 };
                 return stateText[resource.state];
             };
@@ -463,7 +497,7 @@ window.c = function() {
     return {
         view: function(ctrl, args) {
             var contribution = args.contribution;
-            return m(".w-col.w-col-4", [ m(".fontweight-semibold.fontsize-smaller.lineheight-tighter.u-marginbottom-20", "Detalhes do apoio"), m(".fontsize-smallest.lineheight-looser", [ "Valor: R$" + h.formatNumber(contribution.value, 2, 3), m("br"), "Taxa: R$" + h.formatNumber(contribution.gateway_fee, 2, 3), m("br"), "Anônimo: " + (contribution.anonymous ? "Sim" : "Não"), m("br"), "Id pagamento: " + contribution.gateway_id, m("br"), "Apoio: " + contribution.contribution_id, m("br"), "Chave: \n", m("br"), contribution.key, m("br"), "Meio: " + contribution.gateway, m("br"), "Operadora: " + (contribution.gateway_data && contribution.gateway_data.acquirer_name), m("br"), function() {
+            return m(".w-col.w-col-4", [ m(".fontweight-semibold.fontsize-smaller.lineheight-tighter.u-marginbottom-20", "Detalhes do apoio"), m(".fontsize-smallest.lineheight-looser", [ "Valor: R$" + h.formatNumber(contribution.value, 2, 3), m("br"), "Taxa: R$" + h.formatNumber(contribution.gateway_fee, 2, 3), m("br"), "Aguardando Confirmação: " + (contribution.waiting_payment ? "Sim" : "Não"), m("br"), "Anônimo: " + (contribution.anonymous ? "Sim" : "Não"), m("br"), "Id pagamento: " + contribution.gateway_id, m("br"), "Apoio: " + contribution.contribution_id, m("br"), "Chave: \n", m("br"), contribution.key, m("br"), "Meio: " + contribution.gateway, m("br"), "Operadora: " + (contribution.gateway_data && contribution.gateway_data.acquirer_name), m("br"), function() {
                 return contribution.is_second_slip ? [ m('a.link-hidden[href="#"]', "Boleto bancário"), " ", m("span.badge", "2a via") ] : void 0;
             }() ]) ]);
         }
@@ -687,13 +721,14 @@ window.c = function() {
             }), contributionsPerLocation = m.prop([]), generateSort = function(field) {
                 return function() {
                     var collection = contributionsPerLocation(), resource = collection[0], orderedSource = _.sortBy(resource.source, field);
-                    void 0 === resource.orderFilter && (resource.orderFilter = "DESC"), "DESC" == resource.orderFilter && (orderedSource = orderedSource.reverse()), 
-                    resource.source = orderedSource, resource.orderFilter = "DESC" == resource.orderFilter ? "ASC" : "DESC", 
+                    void 0 === resource.orderFilter && (resource.orderFilter = "DESC"), "DESC" === resource.orderFilter && (orderedSource = orderedSource.reverse()), 
+                    resource.source = orderedSource, resource.orderFilter = "DESC" === resource.orderFilter ? "ASC" : "DESC", 
                     contributionsPerLocation(collection);
                 };
             };
-            return vm.project_id(args.resourceId), models.projectContributionsPerLocation.getRow(vm.parameters()).then(contributionsPerLocation), 
-            {
+            return vm.project_id(args.resourceId), models.projectContributionsPerLocation.getRow(vm.parameters()).then(function(data) {
+                contributionsPerLocation(data), generateSort("total_contributed")();
+            }), {
                 contributionsPerLocation: contributionsPerLocation,
                 generateSort: generateSort
             };
@@ -702,10 +737,10 @@ window.c = function() {
             return m(".project-contributions-per-location", [ m(".fontweight-semibold.u-marginbottom-10.fontsize-large.u-text-center", "Localização geográfica dos apoios"), ctrl.contributionsPerLocation().map(function(contributionLocation) {
                 return m(".table-outer.u-marginbottom-60", [ m(".w-row.table-row.fontweight-semibold.fontsize-smaller.header", [ m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", "Estado") ]), m('.w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col[data-ix="sort-arrows"]', [ m('a.link-hidden[href="javascript:void(0);"]', {
                     onclick: ctrl.generateSort("total_contributions")
-                }, [ "Apoios  ", m("span.fa.fa-sort", ".") ]) ]), m('.w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col[data-ix="sort-arrows"]', [ m('a.link-hidden[href="javascript:void(0);"]', {
+                }, [ "Apoios  ", m("span.fa.fa-sort") ]) ]), m('.w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col[data-ix="sort-arrows"]', [ m('a.link-hidden[href="javascript:void(0);"]', {
                     onclick: ctrl.generateSort("total_contributed")
-                }, [ "R$ apoiados ", m("span.w-hidden-small.w-hidden-tiny", "(% do total) "), " ", m("span.fa.fa-sort", ".") ]) ]) ]), m(".table-inner.fontsize-small", [ _.map(contributionLocation.source, function(source) {
-                    return m(".w-row.table-row", [ m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", source.state_acronym) ]), m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", source.total_contributions) ]), m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", "R$ " + h.formatNumber(source.total_contributed, 2, 3) + "  (" + source.total_on_percentage.toFixed(2) + "%)   ") ]) ]);
+                }, [ "R$ apoiados ", m("span.w-hidden-small.w-hidden-tiny", "(% do total) "), " ", m("span.fa.fa-sort") ]) ]) ]), m(".table-inner.fontsize-small", [ _.map(contributionLocation.source, function(source) {
+                    return m(".w-row.table-row", [ m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", source.state_acronym) ]), m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", source.total_contributions) ]), m(".w-col.w-col-4.w-col-small-4.w-col-tiny-4.table-col", [ m("div", [ "R$ ", h.formatNumber(source.total_contributed, 2, 3), m("span.w-hidden-small.w-hidden-tiny", "  (" + source.total_on_percentage.toFixed(2) + "%)") ]) ]) ]);
                 }) ]) ]);
             }) ]);
         }
@@ -714,10 +749,49 @@ window.c = function() {
     return {
         view: function(ctrl, args) {
             var project = args.resource;
-            return m("#project-reminder-count.card.u-radius.u-text-center.medium.u-marginbottom-80", [ m(".fontsize-large.fontweight-semibold", "Total de pessoas que clicaram no botão Lembrar-me"), m(".fontsize-smaller.u-marginbottom-30", "Eles receberão um lembrete por email 48 horas antes do término de sua campanha"), m(".fontsize-jumbo", project.reminder_count) ]);
+            return m("#project-reminder-count.card.u-radius.u-text-center.medium.u-marginbottom-80", [ m(".fontsize-large.fontweight-semibold", "Total de pessoas que clicaram no botão Lembrar-me"), m(".fontsize-smaller.u-marginbottom-30", "Um lembrete por email é enviado 48 horas antes do término da sua campanha"), m(".fontsize-jumbo", project.reminder_count) ]);
         }
     };
-}(window.m), window.c.TeamMembers = function(_, m, models) {
+}(window.m), window.c.RewardManageBox = function(m, h) {
+    return {
+        view: function(ctrl, args) {
+            var reward = args.reward;
+            return m(".w-row.card.u-radius.u-marginbottom-20.medium.card-terciary", [ m(".w-col.w-col-8.u-marginbottom-30.w-sub-col", [ m(".fontsize-large.fontweight-semibold", "Recompensa R$ " + h.formatNumber(reward.minimum_value, 2, 3)), m(".fontsize-small.fontweight-semibold.u-marginbottom-10", reward.paid_count + " apoiadores"), m(".fontsize-smaller", reward.description) ]), m(".w-col.w-col-4", [ m('a.btn.btn-medium[href="/' + reward.id + '"]', {
+                config: m.route
+            }, "Criar questionário") ]) ]);
+        }
+    };
+}(window.m, window.c.h), window.c.RewardSurveyMultipleQuestionBox = function(m, h) {
+    return {
+        controller: function(args) {
+            var question = args.question, displayFormBox = h.toggleProp(!1, !0);
+            return {
+                question: question,
+                displayFormBox: displayFormBox
+            };
+        },
+        view: function(ctrl) {
+            return m(".w-row.card.card-terciary.u-marginbottom-20.medium", [ m(".w-col.w-col-4.w-sub-col", [ m(".fontweight-semibold.fontsize-smallest.u-marginbottom-10", "Múltipla escolha") ]), m(".w-col.w-col-8", ctrl.displayFormBox() ? [ m(".card", [ m(".w-row", [ m(".w-col.w-col-11.w-col-small-11.w-col-tiny-11", [ m(".fontsize-base.fontweight-semibold.fontcolor-secondary.u-marginbottom-20", "Tamanho da camisa") ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1", [ m('a.btn.btn-small.btn-terciary.fa.fa-lg.fa-edit.btn-no-border[href="#"]') ]) ]), m(".w-form", [ m("form", [ m(".w-radio.fontsize-small", [ m("input.w-radio-input"), m("label.w-form-label", "P") ]), m(".w-radio.fontsize-small", [ m('input.w-radio-input[type="radio"]'), m("label.w-form-label", "M") ]) ]) ]) ]) ] : [ m(".w-form.card.u-radius.u-marginbottom-20", [ m("form", [ m(".w-row", [ m(".w-col.w-col-4", [ m("label.fontsize-smaller", "Título da pergunta") ]), m(".w-col.w-col-8", [ m('input.w-input.text-field.positive[type="text"]') ]) ]), m(".w-row", [ m(".w-col.w-col-4", [ m("label.fontsize-smaller", "Texto de ajuda") ]), m(".w-col.w-col-8", [ m('input.w-input.text-field.positive[type="text"]') ]) ]), m(".w-row.u-marginbottom-40", [ m(".w-col.w-col-4", [ m("label.fontsize-smaller", "Opções") ]), m(".w-col.w-col-8", [ m(".w-row", [ m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1.fa.fa-circle-o.fontcolor-terciary.prefix.u-text-center"), m(".w-col.w-col-10.w-col-small-10.w-col-tiny-10", [ m("input.w-input.text-field.positive") ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1") ]), m(".w-row", [ m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1.fa.fa-circle-o.fontcolor-terciary.prefix.u-text-center"), m(".w-col.w-col-10.w-col-small-10.w-col-tiny-10", [ m("input.w-input.text-field.positive") ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1", [ m('a.btn.btn-no-border.btn-terciary.fa.fa-trash.btn-medium[href="#"]', ".") ]) ]), m(".w-row", [ m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1"), m(".w-col.w-col-11.w-col-small-11.w-col-tiny-11", [ m('a.fontcolor-secondary.fontsize-smallest.link-hidden[href="#"]', "Adicionar mais uma opção") ]) ]) ]) ]), m(".w-row", [ m(".w-col.w-col-5.w-col-small-5.w-col-tiny-5.w-sub-col", [ m('input.w-button.btn-terciary.btn.btn-small[type="submit"][value="Salvar"]') ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1", [ m('a.btn.btn-small.btn-terciary.fa.fa-lg.fa-trash.btn-no-border[href="#"]') ]), m(".w-col.w-col-6.w-col-small-6.w-col-tiny-6") ]) ]) ]) ]) ]);
+        }
+    };
+}(window.m, window.c.h), window.c.RewardSurveyOpenQuestionBox = function(m, h) {
+    return {
+        controller: function(args) {
+            var question = args.question, displayFormBox = h.toggleProp(!1, !0);
+            return {
+                question: question,
+                displayFormBox: displayFormBox
+            };
+        },
+        view: function(ctrl) {
+            return m(".w-row.card.card-terciary.u-marginbottom-20.medium", [ m(".w-col.w-col-4.w-sub-col", [ m(".fontweight-semibold.fontsize-smallest.u-marginbottom-10", "Resposta livre") ]), m(".w-col.w-col-8", ctrl.displayFormBox() ? [ m(".card", [ m(".w-row", [ m(".w-col.w-col-11.w-col-small-11.w-col-tiny-11", [ m(".fontsize-base.fontweight-semibold.fontcolor-secondary.u-marginbottom-20", "Qual a sua cor favorita?"), m(".card", [ m("div"), m(".fontsize-smaller.fontcolor-terciary", "Resposta aqui...") ]) ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1", [ m('a.btn.btn-small.btn-terciary.fa.fa-lg.fa-edit.btn-no-border[href="javascript:void(0);"]', {
+                onclick: ctrl.displayFormBox.toggle
+            }) ]) ]) ]) ] : [ m(".w-form.card.u-radius.u-marginbottom-20", [ m('form[data-name="Email Form 2"][id="email-form-2"][name="email-form-2"]', [ m(".w-row", [ m(".w-col.w-col-4", [ m('label.fontsize-smaller[for="name-3"]', "Título da pergunta") ]), m(".w-col.w-col-8", [ m('input.w-input.text-field.positive[data-name="Name 5"][id="name-5"][name="name-5"][type="text"]') ]) ]), m(".w-row.u-marginbottom-40", [ m(".w-col.w-col-4", [ m('label.fontsize-smaller[for="name-3"]', "Texto de ajuda") ]), m(".w-col.w-col-8", [ m("input.w-input.text-field.positive") ]) ]), m(".w-row", [ m(".w-col.w-col-5.w-col-small-5.w-col-tiny-5.w-sub-col", [ m('input.w-button.btn-terciary.btn.btn-small[type="submit"][value="Salvar"]') ]), m(".w-col.w-col-1.w-col-small-1.w-col-tiny-1", [ m('a.btn.btn-small.btn-terciary.fa.fa-lg.fa-trash.btn-no-border[href="javascript:void(0);"]', {
+                onclick: ctrl.displayFormBox.toggle
+            }) ]), m(".w-col.w-col-6.w-col-small-6.w-col-tiny-6") ]) ]) ]) ]) ]);
+        }
+    };
+}(window.m, window.c.h), window.c.TeamMembers = function(_, m, models) {
     return {
         controller: function() {
             var vm = {
@@ -781,45 +855,72 @@ window.c = function() {
         },
         view: function(ctrl) {
             return _.map(ctrl.projectDetails(), function(project) {
-                return m(".project-insights", [ m(".w-row.u-marginbottom-40", [ m(".w-col.w-col-2"), m(".w-col.w-col-8.dashboard-header.u-text-center", [ m.component(c.AdminProjectDetailsCard, {
+                return m(".project-insights", [ m(".w-container", [ m(".w-row.u-marginbottom-40", [ m(".w-col.w-col-2"), m(".w-col.w-col-8.dashboard-header.u-text-center", [ m(".fontweight-semibold.fontsize-larger.lineheight-looser.u-marginbottom-10", "Minha campanha"), m.component(c.AdminProjectDetailsCard, {
                     resource: project
                 }), m.component(c.AdminProjectDetailsExplanation, {
                     resource: project
-                }) ]), m(".w-col.w-col-2") ]), function(project) {
-                    return project.is_published ? [ m(".divider"), m(".w-section.section-one-column.bg-gray.before-footer", [ m(".w-row", [ m(".w-col.w-col-12.dashboard-header.u-text-center", {
+                }) ]), m(".w-col.w-col-2") ]) ]), function(project) {
+                    return project.is_published ? [ m(".divider"), m(".w-section.section-one-column.bg-gray.before-footer", [ m(".w-container", [ m(".w-row", [ m(".w-col.w-col-12.u-text-center", {
                         style: {
                             "min-height": "300px"
                         }
                     }, [ m.component(c.ProjectChartContributionTotalPerDay, {
                         collection: ctrl.contributionsPerDay
-                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.dashboard-header.u-text-center", {
+                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.u-text-center", {
                         style: {
                             "min-height": "300px"
                         }
                     }, [ m.component(c.ProjectChartContributionAmountPerDay, {
                         collection: ctrl.contributionsPerDay
-                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.dashboard-header.u-text-center", [ m.component(c.ProjectContributionsPerLocationTable, {
+                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.u-text-center", [ m.component(c.ProjectContributionsPerLocationTable, {
                         resourceId: ctrl.vm.project_id()
-                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.dashboard-header.u-text-center", [ m.component(c.ProjectReminderCount, {
+                    }) ]) ]), m(".w-row", [ m(".w-col.w-col-12.u-text-center", [ m.component(c.ProjectReminderCount, {
                         resource: project
-                    }) ]) ]) ]) ] : void 0;
+                    }) ]) ]) ]) ]) ] : void 0;
                 }(project) ]);
             });
         }
     };
-}(window.m, window.c, window.c.models, window._), window.c.project.RewardSurveyManage = function(m) {
+}(window.m, window.c, window.c.models, window._), window.c.project.RewardSurveyManage = function(m, models, _, h, c) {
     return {
-        view: function() {
-            return m(".w-section.dashboard-header.u-text-center.u-marginbottom-40", [ m(".w-container", [ m(".w-row", [ m(".w-col.w-col-2"), m(".w-col.w-col-8", [ m(".fontsize-small", "Questionário para os apoiadores de"), m(".fontsize-larger.fontweight-semibold.u-marginbottom-10", "Recompensa de R$20"), m(".fontcolor-secondary.fontsize-smaller", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec,", " mattis ac neque. Duis vulputate commodo lectus, ac blandit elit ...") ]), m(".w-col.w-col-2") ]) ]) ]);
+        controller: function() {
+            var rewardDetails = m.prop([]), questionCollection = m.prop([]), vm = m.postgrest.filtersVM({
+                id: "eq"
+            }), insertQuestion = function(event) {
+                var questionBoxes = {
+                    open_text: m.component(c.RewardSurveyOpenQuestionBox, {
+                        question: null
+                    }),
+                    multiple: m.component(c.RewardSurveyMultipleQuestionBox, {
+                        question: null
+                    })
+                }, currentQuestionBox = questionBoxes[event.target.value];
+                currentQuestionBox && questionCollection().push(currentQuestionBox);
+            };
+            return vm.id(m.route.param("rewardID")), models.rewardDetail.getRow(vm.parameters()).then(rewardDetails),
+            {
+                rewardDetails: rewardDetails,
+                insertQuestion: insertQuestion,
+                questionCollection: questionCollection
+            };
+        },
+        view: function(ctrl) {
+            return _.map(ctrl.rewardDetails(), function(reward) {
+                return m("#reward_survey_manage", [ m(".w-section.dashboard-header.u-text-center.u-marginbottom-40", [ m(".w-container", [ m(".w-row", [ m(".w-col.w-col-2"), m(".w-col.w-col-8", [ m(".fontsize-small", "Questionário para os apoiadores de"), m(".fontsize-larger.fontweight-semibold.u-marginbottom-10", "Recompensa de R$" + h.formatNumber(reward.minimum_value, 2, 3)), m(".fontcolor-secondary.fontsize-smaller", reward.description) ]), m(".w-col.w-col-2") ]) ]) ]), m(".w-section.section", [ m(".w-container", [ m(".w-row", [ m(".w-col.w-col-2"), m(".w-col.w-col-8", [ _.map(ctrl.questionCollection(), function(question) {
+                    return question;
+                }), m(".w-form", [ m("select.w-select.text-field.medium.u-margintop-40.btn-message", {
+                    oninput: ctrl.insertQuestion
+                }, [ m('option[value=""]', "+ Adicionar pergunta"), m('option[value="open_text"]', "Resposta livre"), m('option[value="multiple"]', "Múltipla escolha") ]) ]) ]), m(".w-col.w-col2") ]) ]) ]) ]);
+            });
         }
     };
-}(window.m), window.c.project.RewardsManage = function(m, models, h, _) {
+}(window.m, window.c.models, window._, window.c.h, window.c), window.c.project.RewardsManage = function(m, models, _, c) {
     return {
         controller: function(args) {
             var vm = m.postgrest.filtersVM({
                 project_id: "eq"
             }), projectDetails = m.prop([]);
-            return vm.project_id(args.root.getAttribute("data-id")), models.projectDetail.getRow(vm.parameters()).then(projectDetails),
+            return vm.project_id(args.root.getAttribute("data-id")), models.projectDetail.getRow(vm.parameters()).then(projectDetails), 
             {
                 projectDetails: projectDetails
             };
@@ -827,11 +928,11 @@ window.c = function() {
         view: function(ctrl) {
             return m("#rewards-manage", [ m(".w-section.dashboard-header.u-text-center.u-marginbottom-40", [ m(".w-container", [ m(".w-row", [ m(".w-col.w-col-2"), m(".w-col.w-col-8", [ m(".fontweight-semibold.fontsize-larger.lineheight-looser", "Gerenciar questionários"), m(".fontsize-base", "Envie perguntas customizadas a seus apoiadores e garanta uma ótima experiência na entrega de recompensas") ]), m(".w-col.w-col-2") ]) ]) ]), m(".w-row", [ m(".w-col.w-col-1"), m(".w-col.w-col-10", [ _.map(ctrl.projectDetails(), function(projectDetail) {
                 return _.map(projectDetail.rewards, function(reward) {
-                    return m(".w-row.card.u-radius.u-marginbottom-20.medium.card-terciary", [ m(".w-col.w-col-8.u-marginbottom-30.w-sub-col", [ m(".fontsize-large.fontweight-semibold", "Recompensa R$ " + h.formatNumber(reward.minimum_value, 2, 3)), m(".fontsize-small.fontweight-semibold.u-marginbottom-10", reward.paid_count + " apoiadores"), m(".fontsize-smaller", reward.description) ]), m(".w-col.w-col-4", [ m('a.btn.btn-medium[href="/' + reward.id + '"]', {
-                        config: m.route
-                    }, "Criar questionário") ]) ]);
+                    return m.component(c.RewardManageBox, {
+                        reward: reward
+                    });
                 });
             }) ]), m(".w-col.w-col-1") ]) ]);
         }
     };
-}(window.m, window.c.models, window.c.h, window._);
+}(window.m, window.c.models, window._, window.c);
