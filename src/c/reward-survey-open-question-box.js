@@ -1,11 +1,14 @@
 window.c.RewardSurveyOpenQuestionBox = (function(m, h) {
   return {
     controller: function(args) {
-      var question = args.question,
+      var questionId = m.prop(args.question.id),
+          questionTitle = m.prop(args.question.question || ''),
+          questionHelpText = m.prop(args.question.help_text || ''),
           displayFormBox = h.toggleProp(false, true);
 
       return {
-        question: question,
+        questionTitle: questionTitle,
+        questionHelpText: questionHelpText,
         displayFormBox: displayFormBox
       };
     },
@@ -18,10 +21,10 @@ window.c.RewardSurveyOpenQuestionBox = (function(m, h) {
           m('.card', [
             m('.w-row', [
               m('.w-col.w-col-11.w-col-small-11.w-col-tiny-11', [
-                m('.fontsize-base.fontweight-semibold.fontcolor-secondary.u-marginbottom-20', 'Qual a sua cor favorita?'),
+                m('.fontsize-base.fontweight-semibold.fontcolor-secondary.u-marginbottom-20', ctrl.questionTitle()),
                 m('.card', [
                   m('div'),
-                  m('.fontsize-smaller.fontcolor-terciary', 'Resposta aqui...')
+                  m('.fontsize-smaller.fontcolor-terciary', ctrl.questionHelpText())
                 ])
               ]),
               m('.w-col.w-col-1.w-col-small-1.w-col-tiny-1', [
@@ -36,7 +39,7 @@ window.c.RewardSurveyOpenQuestionBox = (function(m, h) {
                 m('label.fontsize-smaller[for="name-3"]', 'Título da pergunta')
               ]),
               m('.w-col.w-col-8', [
-                m('input.w-input.text-field.positive[data-name="Name 5"][id="name-5"][name="name-5"][type="text"]')
+                m('input.w-input.text-field.positive[type="text"]', {oninput: m.withAttr('value', ctrl.questionTitle), value: ctrl.questionTitle()})
               ])
             ]),
             m('.w-row.u-marginbottom-40', [
@@ -44,7 +47,7 @@ window.c.RewardSurveyOpenQuestionBox = (function(m, h) {
                 m('label.fontsize-smaller[for="name-3"]', 'Texto de ajuda')
               ]),
               m('.w-col.w-col-8', [
-                m('input.w-input.text-field.positive')
+                m('input.w-input.text-field.positive', {oninput: m.withAttr('value', ctrl.questionHelpText), value: ctrl.questionHelpText()})
               ])
             ]),
             m('.w-row', [

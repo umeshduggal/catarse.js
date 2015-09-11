@@ -6,10 +6,12 @@ window.c.project.RewardSurveyManage = (function(m, models, _, h, c){
           vm = m.postgrest.filtersVM({id: 'eq'}),
           insertQuestion = function(event) {
             var questionBoxes = {
-                  open_text: m.component(c.RewardSurveyOpenQuestionBox, {question: null}),
-                  multiple: m.component(c.RewardSurveyMultipleQuestionBox, {question: null})
+                  open_text: 'RewardSurveyOpenQuestionBox',
+                  multiple: 'RewardSurveyMultipleQuestionBox'
                 },
-                currentQuestionBox = questionBoxes[event.target.value];
+                currentQuestionBox = m.component(c[questionBoxes[event.target.value]], {
+                  question: {}
+                });
 
             if (currentQuestionBox) {
               questionCollection().push(currentQuestionBox);
