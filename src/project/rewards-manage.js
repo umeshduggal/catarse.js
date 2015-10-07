@@ -1,18 +1,18 @@
-window.c.project.RewardsManage = (function(m, models, _, c){
+window.c.project.RewardsManage = ((m, models, _, c) => {
   return {
-    controller: function(args) {
-      var vm = m.postgrest.filtersVM({project_id: 'eq'}),
-          projectDetails = m.prop([]);
+    controller: (args) => {
+      const vm = m.postgrest.filtersVM({project_id: 'eq'}),
+            rewardDetails = m.prop([]);
 
       vm.project_id(args.root.getAttribute('data-id'));
 
-      models.projectDetail.getRow(vm.parameters()).then(projectDetails);
+      models.rewardDetail.getPage(vm.parameters()).then(rewardDetails);
 
       return {
-        projectDetails: projectDetails
+        rewardDetails: rewardDetails
       };
     },
-    view: function(ctrl) {
+    view: (ctrl) => {
       return m('#rewards-manage', [
         m('.w-section.dashboard-header.u-text-center.u-marginbottom-40', [
           m('.w-container', [
@@ -30,10 +30,8 @@ window.c.project.RewardsManage = (function(m, models, _, c){
         m('.w-row', [
           m('.w-col.w-col-1'),
           m('.w-col.w-col-10', [
-            _.map(ctrl.projectDetails(), function(projectDetail){
-              return _.map(projectDetail.rewards, function(reward){
-                return m.component(c.RewardManageBox, {reward: reward});
-              });
+            _.map(ctrl.rewardDetails(), (reward) => {
+              return m.component(c.RewardManageBox, {reward: reward});
             })
           ]),
           m('.w-col.w-col-1')
