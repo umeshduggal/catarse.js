@@ -39,7 +39,7 @@ window.c.ProjectDashboardMenu = ((m, _, h) => {
                                 ]),
                                 m('a#dashboard_reports_link.dashboard-nav-link-left.u-marginbottom-30[href="' + editRoute + '#posts' + '"]', [
                                     m('span.fa.fa-bullhorn.fa-fw.fa-lg'), ' Novidades ', m('span.badge', project.posts_count)
-                                ])
+                                ]),
                             ] : '')
                         ]),
                         m('.edit-project-div', [
@@ -64,7 +64,10 @@ window.c.ProjectDashboardMenu = ((m, _, h) => {
                                         m('a#dashboard_preview_link[class="' + editLinkClass + '"][href="' + editRoute + '#preview' + '"]', [
                                             m('span.fa.fa-fw.fa-eye.fa-lg'), ' Preview'
                                         ]),
-                                    ] : '')
+                                    ] : ''),
+                                    m(`a.dashboard-nav-link-left.u-marginbottom-30[href='/pt/projects/${project.id}/rewards_manage']`, [
+                                        m('span.fa.fa-check-square-o.fa-fw.fa-lg'), 'Questionários'
+                                    ])
                                 ])
                             ]) : ''), (!project.is_published ? [
                                 m('.btn-send-draft-fixed', [
