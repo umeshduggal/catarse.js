@@ -167,7 +167,7 @@ const projectsExplore = {
                     m('.u-text-center.u-marginbottom-40', [
                         m('a#explore-open.link-hidden-white.fontweight-light.fontsize-larger[href="javascript:void(0);"]',
                             {onclick: () => ctrl.toggleCategories.toggle()},
-                            ['Explore projetos incríveis ', m(`span#explore-btn.fa.fa-angle-down${ctrl.toggleCategories() ? '.opened' : ''}`, '')])
+                            ['Explore lugares incríveis ', m(`span#explore-btn.fa.fa-angle-down${ctrl.toggleCategories() ? '.opened' : ''}`, '')])
                     ]),
                     m(`#categories.category-slider${ctrl.toggleCategories() ? '.opened' : ''}`, [
                         m('.w-row.u-marginbottom-30', [

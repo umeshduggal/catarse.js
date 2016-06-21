@@ -334,7 +334,7 @@ const start = {
                                 name: 'project[name]',
                                 onchange: h.analytics.oneTimeEvent({cat: 'project_create',act: 'create_form_change',lbl: 'name'})
                             }),
-                            m('.fontsize-larger.fontcolor-negative.u-marginbottom-10', 'na categoria'),
+                            m('.fontsize-larger.fontcolor-negative.u-marginbottom-10', 'na cidade'),
                             m('select.w-select.text-field.medium.u-marginbottom-40', {
                                 name: 'project[category_id]',
                                 onchange: h.analytics.oneTimeEvent({cat: 'project_create',act: 'create_form_change',lbl: 'category'})
