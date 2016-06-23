@@ -83,11 +83,11 @@ const projectDashboardMenu = {
                                 m('a#video_link[class="' + editLinkClass + '"][href="' + editRoute + '#video' + '"]', [
                                     'Vídeo', m('span.fontsize-smallest.fontcolor-secondary', ' (opcional)')
                                 ]),
-                                m('a#budget_link[class="' + editLinkClass + '"][href="' + editRoute + '#budget' + '"]', I18n.t(`${project.mode}.budget_tab`, linksScope())),
+                                //m('a#budget_link[class="' + editLinkClass + '"][href="' + editRoute + '#budget' + '"]', I18n.t(`${project.mode}.budget_tab`, linksScope())),
                                 m('a#card_link[class="' + editLinkClass + '"][href="' + editRoute + '#card' + '"]', I18n.t(`${project.mode}.card_tab`, linksScope())),
-                                m('a#dashboard_reward_link[class="' + editLinkClass + '"][href="' + editRoute + '#reward' + '"]', [
-                                    'Recompensas', optionalOpt
-                                ]),
+                                //m('a#dashboard_reward_link[class="' + editLinkClass + '"][href="' + editRoute + '#reward' + '"]', [
+                                //    'Recompensas', optionalOpt
+                                //]),
                                 m('a#dashboard_user_about_link[class="' + editLinkClass + '"][href="' + editRoute + '#user_about' + '"]', I18n.t(`${project.mode}.about_you_tab`, linksScope())),
                                 ( (project.is_published || project.state === 'draft') || project.is_admin_role ? [
                                     m('a#dashboard_user_settings_link[class="' + editLinkClass + '"][href="' + editRoute + '#user_settings' + '"]', I18n.t(`${project.mode}.account_tab`, linksScope())),
