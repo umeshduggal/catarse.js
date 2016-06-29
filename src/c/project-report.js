@@ -50,61 +50,61 @@ const projectReport = {
                           'Este projeto desrespeita',
                           m.trust('&nbsp;'),
                           m('a.alt-link[href=\'http://suporte.catarse.me/hc/pt-br/articles/202387638\'][target=\'_blank\']',
-                            'nossas regras? '
+                            'our rules ? '
                           )
                         ]
                       ),
                       ctrl.sendSuccess() ?
                        m('.w-form',
                         m('p',
-                          'Obrigado! A sua denúncia foi recebida.'
+                          'Thank you! Their complaint was received.'
                         )
                       ) :
                       [
                         m('.a.w-button.btn.btn-medium.btn-terciary.btn-inline[href=\'javascript:void(0);\']',{onclick: ctrl.displayForm.toggle},
-                        'Denunciar este projeto'
+                        'Report this project'
                       ),
                       ctrl.displayForm() ? m('#report-form.u-margintop-30',
                         m('.w-form',
                           m('form', {onsubmit: ctrl.sendReport},
                             [
                               m('.fontsize-small.fontweight-semibold.u-marginbottom-10',
-                                'Por que você está denunciando este projeto?'
+                                'Why are you reporting this project?'
                               ),
                               m('select.w-select.text-field.positive[required=\'required\']', {onchange: m.withAttr('value', ctrl.reason)},
                                 [
                                   m('option[value=\'\']',
-                                    'Selecione um motivo'
+                                    'Select a reason'
                                   ),
-                                  m('option[value=\'Violação de propriedade intelectual\']',
-                                    'Violação de propriedade intelectual'
+                                  m('option[value=\'Intellectual property infringement\']',
+                                    'Intellectual property infringement'
                                   ),
-                                  m('option[value=\'Calúnia, injúria, difamação ou discriminação\']',
-                                    'Calúnia, injúria, difamação ou discriminação'
+                                  m('option[value=\'Libel, slander , defamation or discrimination\']',
+                                    'Libel, slander , defamation or discrimination'
                                   ),
-                                  m('option[value=\'Escopo de projeto proibido\']',
-                                    'Escopo de projeto proibido'
+                                  m('option[value=\'Scope of prohibited project\']',
+                                    'Scope of prohibited project'
                                   ),
-                                  m('option[value=\'Recompensas proibidas\']',
-                                    'Recompensas proibidas'
+                                  m('option[value=\'Prohibited rewards\']',
+                                    'Prohibited rewards'
                                   ),
-                                  m('option[value=\'Cenas de sexo explícitas e gratuitas\']',
-                                    'Cenas de sexo explícitas e gratuitas'
+                                  m('option[value=\'Dinners explicit and free sex\']',
+                                    'Dinners explicit and free sex'
                                   ),
-                                  m('option[value=\'Abuso de SPAM\']',
-                                    'Abuso de SPAM'
+                                  m('option[value=\'SPAM Abuse\']',
+                                    'SPAM Abuse'
                                   ),
-                                  m('option[value=\'Outros\']',
-                                    'Outros'
+                                  m('option[value=\'Others\']',
+                                    'Others'
                                   )
                                 ]
                               ),
-                              m('textarea.w-input.text-field.positive.u-marginbottom-30', {placeholder: 'Por favor, dê mais detalhes que nos ajudem a identificar o problema', onchange: m.withAttr('value', ctrl.details)}),
+                              m('textarea.w-input.text-field.positive.u-marginbottom-30', {placeholder: 'Please give more details to help us identify the problem', onchange: m.withAttr('value', ctrl.details)}),
                               m('.fontsize-small.fontweight-semibold.u-marginbottom-10',
-                                'Seu email'
+                                'Your email'
                               ),
                               m(`input.w-input.text-field.positive.u-marginbottom-30[required='required'][type='text'][value="${ctrl.email()}"]`, {onchange: m.withAttr('value', ctrl.email)}),
-                              m('input.w-button.btn.btn-medium.btn-inline.btn-dark[type=\'submit\'][value=\'Enviar denúncia\']')
+                              m('input.w-button.btn.btn-medium.btn-inline.btn-dark[type=\'submit\'][value=\'Send Report\']')
                             ]
                           )
                         )

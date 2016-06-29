@@ -40,21 +40,21 @@ const projectFiltersVM = () => {
 
         filters = {
             all: {
-              title: 'Todas as Categorias',
+              title: 'All categories',
               filter: all,
-              nicename: 'No ar',
+              nicename: 'Up in the air',
               isContextual: false,
               keyName: 'all'
           },
             score: {
-              title: 'Todas as Categorias',
+              title: 'All categories',
               filter: score,
-              nicename: 'Populares',
+              nicename: 'Popular',
               isContextual: false,
               keyName: 'score'
           },
             online: {
-              title: 'No ar',
+              title: 'Up in the air',
               filter: online,
               isContextual: false,
               keyName: 'online'
@@ -66,27 +66,27 @@ const projectFiltersVM = () => {
               keyName: 'expiring'
           },
             successful: {
-              title: 'Todas as Categorias',
+              title: 'All categories',
               filter: successful,
-              nicename: 'Financiados',
+              nicename: 'Financed',
               isContextual: false,
               keyName: 'successful'
           },
             finished: {
-              title: 'Todas as Categorias',
+              title: 'All categories',
               filter: finished,
-              nicename: 'Finalizados',
+              nicename: 'Finalized',
               isContextual: false,
               keyName: 'finished'
           },
             recent: {
-              title: 'Recentes',
+              title: 'Recent',
               filter: recent,
               isContextual: false,
               keyName: 'recent'
           },
             near_me: {
-              title: 'Próximos a mim',
+              title: 'Near me',
               filter: nearMe,
               isContextual: false,
               keyName: 'near_me'

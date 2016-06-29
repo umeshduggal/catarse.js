@@ -167,7 +167,7 @@ const projectsExplore = {
                     m('.u-text-center.u-marginbottom-40', [
                         m('a#explore-open.link-hidden-white.fontweight-light.fontsize-larger[href="javascript:void(0);"]',
                             {onclick: () => ctrl.toggleCategories.toggle()},
-                            ['Explore lugares incríveis ', m(`span#explore-btn.fa.fa-angle-down${ctrl.toggleCategories() ? '.opened' : ''}`, '')])
+                            ['Explore amazing places ', m(`span#explore-btn.fa.fa-angle-down${ctrl.toggleCategories() ? '.opened' : ''}`, '')])
                     ]),
                     m(`#categories.category-slider${ctrl.toggleCategories() ? '.opened' : ''}`, [
                         m('.w-row.u-marginbottom-30', [
@@ -239,10 +239,10 @@ const projectsExplore = {
             m('.w-section.section-large.before-footer.u-margintop-80.bg-gray.divider', [
                 m('.w-container.u-text-center', [
                     m('img.u-marginbottom-20.icon-hero', {src: 'https://daks2k3a4ib2z.cloudfront.net/54b440b85608e3f4389db387/56f4414d3a0fcc0124ec9a24_icon-launch-explore.png'}),
-                    m('h2.fontsize-larger.u-marginbottom-60', 'Lance sua campanha no Catarse!'),
+                    m('h2.fontsize-larger.u-marginbottom-60', 'Launch your campaign Catarse!'),
                     m('.w-row', [
                         m('.w-col.w-col-4.w-col-push-4', [
-                            m('a.w-button.btn.btn-large', {href: '/start?ref=ctrse_explore'}, 'Aprenda como')
+                            m('a.w-button.btn.btn-large', {href: '/start?ref=ctrse_explore'}, 'Learn how')
                         ])
                     ])
                 ])

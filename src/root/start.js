@@ -320,7 +320,7 @@ const start = {
             ]),
             m('#start-form.w-section.section-large.u-text-center.bg-purple.before-footer', [
                 m('.w-container', [
-                    m('.fontsize-jumbo.fontcolor-negative.u-marginbottom-60', 'Crie o seu rascunho gratuitamente!'),
+                    m('.fontsize-jumbo.fontcolor-negative.u-marginbottom-60', 'Create your free draft!'),
                     m('form[action="/projects/fallback_create"][method="GET"].w-row.w-form', {
                         onsubmit: h.analytics.oneTimeEvent({cat: 'project_create',act: 'create_form_submit'})
                     },
@@ -334,7 +334,7 @@ const start = {
                                 name: 'project[name]',
                                 onchange: h.analytics.oneTimeEvent({cat: 'project_create',act: 'create_form_change',lbl: 'name'})
                             }),
-                            m('.fontsize-larger.fontcolor-negative.u-marginbottom-10', 'na cidade'),
+                            m('.fontsize-larger.fontcolor-negative.u-marginbottom-10', 'in the city'),
                             m('select.w-select.text-field.medium.u-marginbottom-40', {
                                 name: 'project[category_id]',
                                 onchange: h.analytics.oneTimeEvent({cat: 'project_create',act: 'create_form_change',lbl: 'category'})

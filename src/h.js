@@ -433,16 +433,17 @@ const hashMatch = (str) => { return window.location.hash === str; },
           };
       },
       analyticsWindowScroll = (eventObj) => {
-          if (eventObj) {
-              let fireEvent = analyticsEvent(eventObj);
-              window.addEventListener('scroll', function(e){
-                  //console.log('windowScroll');
-                  if (fireEvent && $ && $(document).scrollTop() > $(window).height() * (3 / 4)) {
-                      fireEvent = null;
-                      fireEvent();
-                  }
-              });
-          }
+        if (eventObj) {
+            let fired=false;
+            window.addEventListener('scroll', function(e){
+                //console.log('windowScroll');
+                if (!fired && $ && $(document).scrollTop() > $(window).height() * (3 / 4)) {
+                  fired=true;
+                  const fireEvent = analyticsEvent(eventObj);
+                  fireEvent();
+                }
+            });
+        }
       },
       analytics = {
           event: analyticsEvent,

@@ -45,7 +45,7 @@ const projectUserCard = {
                                 ]) : '');
                             })
                         ]),
-                        (!_.isEmpty(userDetail) ? [m('a.w-button.btn.btn-terciary.btn-small.btn-inline[href=\'javascript:void(0);\']',{onclick: h.analytics.event({cat: 'project_view',act: 'project_creator_sendmsg',lbl: userDetail.id,project: project()}, ctrl.displayModal.toggle)}, 'Enviar mensagem')] : ''),
+                        (!_.isEmpty(userDetail) ? [m('a.w-button.btn.btn-terciary.btn-small.btn-inline[href=\'javascript:void(0);\']',{onclick: h.analytics.event({cat: 'project_view',act: 'project_creator_sendmsg',lbl: userDetail.id,project: project()}, ctrl.displayModal.toggle)}, 'Send message')] : ''),
                         args.project().is_admin_role ?
                         m('p', userDetail.email) : ''
                     ]),

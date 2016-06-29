@@ -37,7 +37,7 @@ const insights = {
         const lContributionsPerDay = loader(models.projectContributionsPerDay.getRowOptions(filtersVM.parameters()));
         lContributionsPerDay.load().then(contributionsPerDay);
 
-        let contributionsPerLocationTable = [['Estado', 'Apoios', 'R$ apoiados (% do total)']];
+        let contributionsPerLocationTable = [['State', 'Support', 'R$ supported (% of total)']];
         const buildPerLocationTable = (contributions) => {
             return (!_.isEmpty(contributions)) ? _.map(_.first(contributions).source, (contribution) => {
                 let column = [];

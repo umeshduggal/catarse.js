@@ -67,10 +67,10 @@ const projectReminder = {
                 onclick: h.analytics.event({cat: 'project_view',act: 'project_floatingreminder_click', project: project()}, ctrl.submitReminder)
             }, [
                 (ctrl.l() ? 'aguarde ...' : m('span.fa.fa-clock-o', [
-                    m(`span${hideTextOnMobile ? '.w-hidden-medium' : ''}`, project().in_reminder ? ' Lembrete ativo' : ' Lembrar-me')
+                    m(`span${hideTextOnMobile ? '.w-hidden-medium' : ''}`, project().in_reminder ? ' Active reminder' : ' Remember me')
                 ]))
             ]), (ctrl.popNotification() ? m.component(popNotification, {
-                message: 'Ok! Vamos te mandar um lembrete por e-mail 48 horas antes do fim da campanha'
+                message: 'OK! We will send you a reminder email 48 hours before the end of the campaign'
             }) : '')
         ]);
     }

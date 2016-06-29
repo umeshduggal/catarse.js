@@ -46,7 +46,7 @@ const userCard = {
                             ]);
                         })
                     ]),
-                ]), (!_.isEmpty(userDetail.email) ? m('a.btn.btn-medium.btn-message[href="mailto:' + userDetail.email + '"][itemprop="email"][target="_blank"]', 'Enviar mensagem') : '')
+                ]), (!_.isEmpty(userDetail.email) ? m('a.btn.btn-medium.btn-message[href="mailto:' + userDetail.email + '"][itemprop="email"][target="_blank"]', 'Send message') : '')
             ]);
         }));
     }

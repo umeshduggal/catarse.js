@@ -20,14 +20,14 @@ const projectMode = {
         const project = args.project(),
             mode = project.mode,
             modeImgSrc = (mode === 'aon') ? '/assets/aon-badge.png' : '/assets/flex-badge.png',
-            modeTitle = (mode === 'aon') ? 'Campanha Tudo-ou-nada ' : 'Campanha Flexível ',
-            goal = (_.isNull(project.goal) ? 'não definida' : h.formatNumber(project.goal)),
+            modeTitle = (mode === 'aon') ? 'Campaign All -or-nothing ' : 'Flexible campaign ',
+            goal = (_.isNull(project.goal) ? 'not defined' : h.formatNumber(project.goal)),
             attending = (_.isNull(project.total_contributors) ? 'not defined' : project.total_contributors),
             stillNeeded = (_.isNull(project.min_people) ? 'not defined' : project.min_people - project.total_contributors),
             buildTooltip = (el) => {
                 return m.component(tooltip, {
                     el: el,
-                    text: (mode === 'aon') ? `Somente receberá os recursos se atingir ou ultrapassar a meta até o dia ${h.momentify(project.zone_expires_at, 'DD/MM/YYYY')}.` : 'O realizador receberá todos os recursos quando encerrar a campanha, mesmo que não tenha atingido esta meta.',
+                    text: (mode === 'aon') ? `Only receive the resources to achieve or exceed the target until the day ${h.momentify(project.zone_expires_at, 'DD/MM/YYYY')}.` : 'The director receives all the features when you shut down the campaign , even if it has not reached this goal.',
                     width: 280
                 });
             };

@@ -106,10 +106,10 @@ const adminProjectDetailsCard = {
                         ]),
                         m('.w-col.w-col-3.w-col-small-3.w-col-tiny-6', [
                             (_.isNull(project.expires_at) ? [
-                                m('.fontcolor-secondary.lineheight-tighter.fontsize-small', 'iniciado há'),
+                                m('.fontcolor-secondary.lineheight-tighter.fontsize-small', 'started there'),
                                 m('.fontweight-semibold.fontsize-large.lineheight-tight', elapsedTextObj.total + ' ' + elapsedTextObj.unit)
                             ] : [
-                                 m('.fontcolor-secondary.lineheight-tighter.fontsize-small', 'restam'),
+                                 m('.fontcolor-secondary.lineheight-tighter.fontsize-small', 'left'),
                                  m('.fontweight-semibold.fontsize-large.lineheight-tight', remainingTextObj.total + ' ' + remainingTextObj.unit)
                              ])
                         ])
